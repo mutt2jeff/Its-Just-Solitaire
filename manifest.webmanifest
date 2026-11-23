@@ -1,0 +1,15 @@
+{
+  "name": "It's Just Solitaire",
+  "short_name": "Solitaire",
+  "description": "Klondike solitaire with Draw 1 or Draw 3, undo, hints and stats.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d4440",
+  "theme_color": "#0d4440",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
