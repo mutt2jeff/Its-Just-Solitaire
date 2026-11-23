@@ -360,5 +360,44 @@ body::before {
 .sheet-actions { display: flex; justify-content: space-between; margin-top: 10px; }
 .ghost.danger { color: #b0343c; }
 
+/* ---------- Phone landscape: stats on the left, tools on the right ---------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  body { flex-direction: row; }
+
+  .topbar {
+    order: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    width: 64px;
+    max-width: none;
+    margin: 0;
+    padding: 8px 4px;
+  }
+  .brand { display: none; }
+  .stats { flex-direction: column; gap: 12px; }
+  .stat { align-items: center; }
+  .label { font-size: 9px; }
+  .value { font-size: 15px; }
+
+  .board { order: 1; max-width: none; }
+
+  .toolbar {
+    order: 2;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    width: 68px;
+    max-width: none;
+    margin: 0;
+    padding: 6px 4px;
+  }
+  .tool { flex: none; min-height: 50px; padding: 4px; font-size: 11px; }
+  .tool svg { width: 20px; height: 20px; }
+
+  .auto-finish { bottom: calc(env(safe-area-inset-bottom) + 14px); }
+  .toast { bottom: calc(env(safe-area-inset-bottom) + 70px); }
+}
+
 @keyframes fade { from { opacity: 0; } }
 @keyframes pop { from { transform: scale(0.9); opacity: 0; } }

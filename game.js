@@ -93,9 +93,9 @@
       body = courtArt(r, s, col);
     }
     return `<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <text x="7" y="28" font-size="${label === '10' ? 24 : 27}" font-weight="700" fill="${col}"
-        font-family="Georgia, 'Times New Roman', serif" letter-spacing="-1.5">${label}</text>
-      ${suitUse(s, 71, 8, 21, col)}${body}</svg>`;
+      <text x="6" y="31" font-size="${label === '10' ? 27 : 32}" font-weight="700" fill="${col}"
+        font-family="Georgia, 'Times New Roman', serif" letter-spacing="-2">${label}</text>
+      ${suitUse(s, 69, 6, 25, col)}${body}</svg>`;
   }
 
   function installCardBack() {
@@ -146,16 +146,36 @@
 
   /* ================= Layout ================= */
 
-  function computeMetrics() {
+  const MIN_UP = 0.24; // face-up overlap that keeps the corner rank readable (x card height)
+  const MIN_DOWN = 0.05;
+
+  /** Largest card height that lets every column fan out readably (Infinity if no limit). */
+  function columnFitCh() {
+    if (!S || !M) return Infinity;
+    const room = M.H - M.top - 2.6 * M.gap;
+    let cap = Infinity;
+    S.tableau.forEach(p => {
+      if (p.length < 2) return;
+      const d = p.slice(0, -1).filter(id => !S.up[id]).length;
+      const u = p.length - 1 - d;
+      cap = Math.min(cap, room / (2 + MIN_DOWN * d + MIN_UP * u));
+    });
+    return Math.floor(cap);
+  }
+
+  function computeMetrics(maxCh = Infinity) {
     const W = board.clientWidth, H = board.clientHeight;
-    const gap = Math.max(4, Math.min(14, W * 0.018));
+    const wide = W > H * 1.3; // landscape: height is the limit
+    const gap = Math.max(4, Math.min(14, W * 0.018, H * 0.025));
+    // Height must fit the top row plus room for long columns to fan downward
+    const rows = wide ? 3.7 : 3.3;
     let cw = (W - gap * 8) / 7;
-    cw = Math.floor(Math.min(cw, 112, (H - gap * 3) / (1.4 * 3.3)));
+    cw = Math.floor(Math.min(cw, 112, (H - gap * 3) / (1.4 * rows), maxCh / 1.4));
     const ch = Math.round(cw * 1.4);
     const left = Math.round((W - (cw * 7 + gap * 6)) / 2);
     const top = Math.round(gap);
     M = {
-      W, H, gap, cw, ch, top,
+      W, H, gap, cw, ch, top, maxCh,
       x: i => left + i * (cw + gap),
       tabY: Math.round(top + ch + gap * 1.6),
     };
@@ -166,6 +186,9 @@
   function setSlot(el, x, y) { el.style.transform = `translate3d(${x}px,${y}px,0)`; }
 
   function layout(opts = {}) {
+    // Shrink cards slightly while a very long column needs the room; grow back after
+    const fit = columnFitCh();
+    if (fit !== M.maxCh) computeMetrics(fit);
     const { cw, ch, x, top, tabY, H, gap } = M;
     const lifted = new Set(opts.lifted || []);
     const delays = opts.delays || {};
@@ -207,10 +230,14 @@
       const gapsDown = p.slice(0, -1).filter(id => !S.up[id]).length;
       const gapsUp = Math.max(0, p.length - 1 - gapsDown);
       if (gapsUp && gapsDown * down + gapsUp * up + ch > avail) {
-        up = Math.max(ch * 0.13, (avail - ch - gapsDown * down) / gapsUp);
+        up = Math.max(ch * MIN_UP, (avail - ch - gapsDown * down) / gapsUp);
       }
       if (gapsDown && gapsDown * down + gapsUp * up + ch > avail) {
-        down = Math.max(ch * 0.05, (avail - ch - gapsUp * up) / gapsDown);
+        down = Math.max(ch * MIN_DOWN, (avail - ch - gapsUp * up) / gapsDown);
+      }
+      // Last resort for very long columns: squeeze face-up cards so nothing goes off screen
+      if (gapsUp && gapsDown * down + gapsUp * up + ch > avail) {
+        up = Math.max(2, (avail - ch - gapsDown * down) / gapsUp);
       }
       let y = tabY;
       p.forEach((id, i) => {
