@@ -79,23 +79,23 @@
     const label = E.LABELS[r];
     let body = '';
     if (r === 1) {
-      body = `<circle cx="50" cy="86" r="33" fill="none" stroke="${GOLD}" stroke-width="1.5"/>
-        <circle cx="50" cy="86" r="28" fill="none" stroke="${GOLD}" stroke-width=".9" stroke-dasharray="2 3"/>
-        ${suitUse(s, 28, 64, 44, col)}`;
+      body = `<circle cx="50" cy="90" r="30" fill="none" stroke="${GOLD}" stroke-width="1.5"/>
+        <circle cx="50" cy="90" r="25" fill="none" stroke="${GOLD}" stroke-width=".9" stroke-dasharray="2 3"/>
+        ${suitUse(s, 30, 70, 40, col)}`;
     } else if (r <= 10) {
       const xs = [27, 50, 73];
       body = PIPS[r].map(([c, t]) => {
-        const cx = xs[c], cy = 50 + t * 68, sz = 19;
+        const cx = xs[c], cy = 58 + t * 62, sz = 18;
         const flip = t > 0.5 ? `transform="rotate(180 ${cx} ${cy})"` : '';
         return suitUse(s, cx - sz / 2, cy - sz / 2, sz, col, flip);
       }).join('');
     } else {
-      body = courtArt(r, s, col);
+      body = `<g transform="translate(6 12) scale(.88)">${courtArt(r, s, col)}</g>`;
     }
     return `<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <text x="5" y="34" font-size="${label === '10' ? 31 : 38}" font-weight="700" fill="${col}"
-        font-family="Georgia, 'Times New Roman', serif" letter-spacing="-3">${label}</text>
-      ${suitUse(s, 66, 5, 29, col)}${body}</svg>`;
+      <text x="4" y="40" font-size="${label === '10' ? 40 : 50}" font-weight="700" fill="${col}"
+        font-family="Georgia, 'Times New Roman', serif" letter-spacing="${label === '10' ? -5 : -3}">${label}</text>
+      ${suitUse(s, 63, 5, 34, col)}${body}</svg>`;
   }
 
   function installCardBack() {
@@ -146,7 +146,7 @@
 
   /* ================= Layout ================= */
 
-  const MIN_UP = 0.26; // face-up overlap that keeps the corner rank readable (x card height)
+  const MIN_UP = 0.3; // face-up overlap that keeps the corner rank readable (x card height)
   const MIN_DOWN = 0.05;
 
   /** Largest card height that lets every column fan out readably (Infinity if no limit). */
@@ -169,7 +169,7 @@
     const gap = Math.max(3, Math.min(12, W * 0.012, H * 0.022));
     // Height must fit the top row plus room for columns to fan downward;
     // very long columns shrink cards temporarily (see columnFitCh)
-    const rows = 3.3;
+    const rows = W > H ? 2.75 : 3.3;
     let cw = (W - gap * 8) / 7;
     cw = Math.floor(Math.min(cw, 112, (H - gap * 3) / (1.4 * rows), maxCh / 1.4));
     const ch = Math.round(cw * 1.4);
@@ -227,7 +227,8 @@
 
     const avail = H - tabY - gap;
     S.tableau.forEach((p, ti) => {
-      let down = ch * 0.11, up = ch * 0.28;
+      // Generous fans when there is room (portrait), compressed when not
+      let down = ch * 0.12, up = ch * 0.42;
       const gapsDown = p.slice(0, -1).filter(id => !S.up[id]).length;
       const gapsUp = Math.max(0, p.length - 1 - gapsDown);
       if (gapsUp && gapsDown * down + gapsUp * up + ch > avail) {
