@@ -359,6 +359,7 @@ body::before {
 .stat-grid span { font-size: 11px; color: #6a7280; line-height: 1.2; }
 .sheet-actions { display: flex; justify-content: space-between; margin-top: 10px; }
 .ghost.danger { color: #b0343c; }
+.sheet .version { margin: 4px 0 0; font-size: 11px; color: #9aa1ab; }
 
 /* ---------- Phone landscape: stats on the left, tools on the right ---------- */
 @media (orientation: landscape) and (max-height: 600px) {

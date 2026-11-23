@@ -93,9 +93,9 @@
       body = courtArt(r, s, col);
     }
     return `<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <text x="6" y="31" font-size="${label === '10' ? 27 : 32}" font-weight="700" fill="${col}"
-        font-family="Georgia, 'Times New Roman', serif" letter-spacing="-2">${label}</text>
-      ${suitUse(s, 69, 6, 25, col)}${body}</svg>`;
+      <text x="5" y="34" font-size="${label === '10' ? 31 : 38}" font-weight="700" fill="${col}"
+        font-family="Georgia, 'Times New Roman', serif" letter-spacing="-3">${label}</text>
+      ${suitUse(s, 66, 5, 29, col)}${body}</svg>`;
   }
 
   function installCardBack() {
@@ -146,7 +146,7 @@
 
   /* ================= Layout ================= */
 
-  const MIN_UP = 0.24; // face-up overlap that keeps the corner rank readable (x card height)
+  const MIN_UP = 0.26; // face-up overlap that keeps the corner rank readable (x card height)
   const MIN_DOWN = 0.05;
 
   /** Largest card height that lets every column fan out readably (Infinity if no limit). */
@@ -165,14 +165,15 @@
 
   function computeMetrics(maxCh = Infinity) {
     const W = board.clientWidth, H = board.clientHeight;
-    const wide = W > H * 1.3; // landscape: height is the limit
-    const gap = Math.max(4, Math.min(14, W * 0.018, H * 0.025));
-    // Height must fit the top row plus room for long columns to fan downward
-    const rows = wide ? 3.7 : 3.3;
+    // Tight gaps so cards get as much width as possible on phones
+    const gap = Math.max(3, Math.min(12, W * 0.012, H * 0.022));
+    // Height must fit the top row plus room for columns to fan downward;
+    // very long columns shrink cards temporarily (see columnFitCh)
+    const rows = 3.3;
     let cw = (W - gap * 8) / 7;
     cw = Math.floor(Math.min(cw, 112, (H - gap * 3) / (1.4 * rows), maxCh / 1.4));
     const ch = Math.round(cw * 1.4);
-    const left = Math.round((W - (cw * 7 + gap * 6)) / 2);
+    const left = Math.max(gap, Math.round((W - (cw * 7 + gap * 6)) / 2));
     const top = Math.round(gap);
     M = {
       W, H, gap, cw, ch, top, maxCh,
@@ -722,6 +723,11 @@
       }
     }, 1000);
     document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+
+    // Keep installed copies up to date and playable offline
+    if ('serviceWorker' in navigator && location.protocol === 'https:') {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ });
+    }
 
     const saved = load();
     if (saved) {
